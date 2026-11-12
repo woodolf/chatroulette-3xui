@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Видеочат Рулетка — rulet.bot.nu</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { height: 48px; background: #161b22; border-bottom: 1px solid #30363d; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 14px; }
+    .brand { font-weight: 700; color: #f0f6fc; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .stats-badge { display: flex; gap: 15px; align-items: center; background: #0d1117; padding: 5px 14px; border-radius: 20px; border: 1px solid #30363d; font-size: 13px; }
+    .dot { width: 8px; height: 8px; background: #238636; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #238636; margin-right: 6px; }
+    .videos { flex: 1; display: flex; flex-direction: column; background: #010409; min-height: 0; }
+    @media (min-width: 768px) { .videos { flex-direction: row; } }
+    .video-box { flex: 1; position: relative; border: 1px solid #21262d; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; }
+    video { width: 100%; height: 100%; object-fit: cover; }
+    #localVideo { transform: scaleX(-1); }
+    .label { position: absolute; bottom: 12px; left: 12px; background: rgba(22, 27, 34, 0.85); padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid #30363d; color: #f0f6fc; }
+    .media-controls { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 8px; }
+    .btn-icon { background: rgba(22, 27, 34, 0.85); color: #f0f6fc; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .btn-icon.off { background: #da3633; border-color: #f85149; }
+    .bottom { height: 140px; background: #161b22; border-top: 1px solid #30363d; display: flex; padding: 12px 20px; gap: 16px; align-items: stretch; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+    .btn { height: 50px; padding: 0 24px; font-size: 14px; font-weight: 600; border-radius: 6px; border: 1px solid rgba(240,246,252,0.1); cursor: pointer; text-transform: uppercase; color: #fff; transition: 0.15s; }
+    .btn-start { background: #238636; } .btn-start:hover { background: #2ea043; }
+    .btn-next { background: #1f6feb; display: none; } .btn-next:hover { background: #388bfd; }
+    .btn-stop { background: #da3633; display: none; } .btn-stop:hover { background: #f85149; }
+    .chat-box { flex: 1; display: flex; flex-direction: column; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 8px 12px; min-width: 0; }
+    .messages { flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+    .msg-sys { color: #58a6ff; font-weight: 600; }
+    .chat-form { display: flex; gap: 8px; }
+    .chat-input { flex: 1; background: #010409; border: 1px solid #30363d; border-radius: 6px; color: #f0f6fc; padding: 0 12px; height: 34px; font-size: 13px; }
+    .chat-input:focus { outline: none; border-color: #58a6ff; }
+    .btn-send { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 0 16px; font-weight: 600; cursor: pointer; }
+    .btn-send:disabled { opacity: 0.5; cursor: default; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">🎥 Чат-Рулетка</div>
+    <div class="stats-badge">
+      <span><span class="dot"></span>Онлайн: <b id="onlineCount">0</b></span>
+      <span>В поиске: <b id="queueCount">0</b></span>
+    </div>
+  </div>
+  <div class="videos">
+    <div class="video-box">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <div class="label" id="partnerLabel">Собеседник</div>
+    </div>
+    <div class="video-box">
+      <video id="localVideo" autoplay playsinline muted></video>
+      <div class="label">Вы</div>
+      <div class="media-controls">
+        <button id="toggleMic" class="btn-icon">Микрофон: Вкл</button>
+        <button id="toggleCam" class="btn-icon">Камера: Вкл</button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom">
+    <div class="actions">
+      <button id="startBtn" class="btn btn-start">Старт</button>
+      <button id="nextBtn" class="btn btn-next">Следующий</button>
+      <button id="stopBtn" class="btn btn-stop">Стоп</button>
+    </div>
+    <div class="chat-box">
+      <div id="messages" class="messages"></div>
+      <div class="chat-form">
+        <input type="text" id="chatInput" class="chat-input" placeholder="Напишите сообщение..." disabled>
+        <button id="sendBtn" class="btn-send" disabled>Отправить</button>
+      </div>
+    </div>
+  </div>
+  <script src="/app.js?v=15"></script>
+  <script src="/admin-panel.js?v=16"></script>
+</body>
+</html>
